@@ -249,5 +249,28 @@ namespace FloraKozmetik.Controllers
 
             return Json(new { success = false, message = "Şifre güncellenemedi. Şifre en az 1 büyük harf ve 1 rakam içermeli." });
         }
+
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new { success = false });
+
+            // İlişkili verileri sil
+            var cartItems = await _context.CartItems.Where(c => c.UserId == user.Id).ToListAsync();
+            var favorites = await _context.Favorites.Where(f => f.UserId == user.Id).ToListAsync();
+            var addresses = await _context.Addresses.Where(a => a.UserId == user.Id).ToListAsync();
+
+            _context.CartItems.RemoveRange(cartItems);
+            _context.Favorites.RemoveRange(favorites);
+            _context.Addresses.RemoveRange(addresses);
+            await _context.SaveChangesAsync();
+
+            await _signInManager.SignOutAsync();
+            await _userManager.DeleteAsync(user);
+            return Json(new { success = true });
+        }
     }
 }

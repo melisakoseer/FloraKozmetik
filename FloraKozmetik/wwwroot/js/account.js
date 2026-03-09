@@ -80,3 +80,18 @@ function changePassword() {
         }
     });
 }
+function deleteAccount() {
+    $('#deleteAccountModal').css('display', 'flex');
+}
+
+function closeDeleteAccountModal() {
+    $('#deleteAccountModal').hide();
+}
+
+function confirmDeleteAccount() {
+    $.post('/Account/DeleteAccount', function (data) {
+        if (data.success) {
+            window.location.href = '/';
+        }
+    });
+}

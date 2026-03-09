@@ -46,6 +46,7 @@
                 Çıkış Yap
             </button>
         </form>
+        <button onclick="deleteAccount()" class="btn-outline-danger">Hesabımı Sil</button>
     </aside>
 
     <!-- SAĞ İÇERİK -->
@@ -261,7 +262,16 @@
                 <button class="profile-save-btn" onclick="changePassword()">Şifreyi Güncelle</button>
             </div>
         </div>
-
+    </div>
+    <div class="modal-overlay" id="deleteAccountModal" style="display:none">
+        <div class="modal-box">
+            <h3>Hesabı Sil</h3>
+            <p>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+            <div class="modal-actions">
+                <button onclick="closeDeleteAccountModal()" class="btn-outline">Vazgeç</button>
+                <button onclick="confirmDeleteAccount()" class="btn-danger">Hesabı Sil</button>
+            </div>
+        </div>
     </div>
 </div>
 
