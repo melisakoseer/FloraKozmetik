@@ -46,8 +46,9 @@ function refreshFavoriteCount() {
 }
 
 // SEPETE EKLE
-function addToCart(productId) {
-    $.post('/Cart/Add', { productId: productId }, function (data) {
+function addToCart(productId, quantity) {
+    quantity = quantity || 1;
+    $.post('/Cart/Add', { productId: productId, quantity: quantity }, function (data) {
         if (data.requireLogin) {
             showToast(data.message, 'error');
             setTimeout(() => window.location.href = '/Account/Login', 1500);

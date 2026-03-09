@@ -64,7 +64,7 @@ namespace FloraKozmetik.Controllers
 
         // Sepete ekle
         [HttpPost]
-        public async Task<IActionResult> Add(int productId)
+        public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
             if (!User.Identity!.IsAuthenticated)
                 return Json(new { success = false, message = "Sepete eklemek için giriş yapmalısınız.", requireLogin = true });
@@ -80,15 +80,15 @@ namespace FloraKozmetik.Controllers
 
             if (existing != null)
             {
-                existing.Quantity++;//Aynı ürün tekrar eklenirse mevcut kaydın miktarını arttır.
+                existing.Quantity += quantity;//aynı üründen eklenirse mevcut ürün adetini arttır
             }
             else
             {
                 _context.CartItems.Add(new CartItem
                 {
-                    UserId    = userId!,
+                    UserId = userId!,
                     ProductId = productId,
-                    Quantity  = 1
+                    Quantity = quantity
                 });
             }
 

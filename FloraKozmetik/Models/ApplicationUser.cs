@@ -14,7 +14,7 @@ namespace FloraKozmetik.Models
         public DateTime? BirthDate { get; set; }
 
         [StringLength(20)]
-        public string Gender { get; set; } = string.Empty;  // "Erkek" / "Kadın" / "Belirtmek istemiyorum"
+        public string Gender { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
