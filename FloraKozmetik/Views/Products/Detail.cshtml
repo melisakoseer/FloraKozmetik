@@ -1,0 +1,200 @@
+﻿@using FloraKozmetik.Models
+@{
+    var p = ViewBag.Product as Product;
+    var related = ViewBag.Related as List<Product> ?? new List<Product>();
+    ViewData["Title"] = p?.Name ?? "Ürün Detayı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var catLabel = p?.Category switch
+    {
+        "skincare" => "Yüz Bakımı",
+        "fragrances" => "Parfümler",
+        "beauty" => "Makyaj",
+        _ => "Ürünler"
+    };
+    var disc = (p != null && p.OriginalPrice.HasValue)
+        ? (int)Math.Round((1 - p.Price / p.OriginalPrice.Value) * 100)
+        : 0;
+}
+
+<div class="breadcrumb">
+    <a href=@Url.Action("Index", "Home")>Ana Sayfa</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href=@Url.Action("Index", "Products", new { category = p?.Category })>@catLabel</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">@p?.Name</span>
+</div>
+
+@if (p == null)
+{
+    <div style="text-align:center;padding:80px">
+        <p>Ürün bulunamadı.</p>
+        <a href=@Url.Action("Index", "Home")>Ana Sayfaya Dön</a>
+    </div>
+}
+else
+{
+    <div class="detail-layout">
+
+        <!-- GALERİ -->
+        <div class="detail-gallery">
+            <div class="gallery-main">
+                <img class="gallery-main-img" id="galleryMain" src=@p.ImageUrl alt=@p.Name />
+            </div>
+            <div class="gallery-thumbs">
+                <div class="gallery-thumb active" onclick="switchThumb(this, @p.ImageUrl)">
+                    <img src=@p.ImageUrl alt="@p.Name" />
+                </div>
+            </div>
+        </div>
+
+        <!-- BİLGİ -->
+        <div class="detail-info">
+            <p class="detail-brand">@p.Brand</p>
+            <h1 class="detail-name">@p.Name</h1>
+
+            <div class="detail-price">
+                <span class="detail-price-new">₺@p.Price.ToString("N0")</span>
+                @if (p.OriginalPrice.HasValue)
+                {
+                    <span class="detail-price-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                    <span class="detail-price-disc">-%@disc</span>
+                }
+            </div>
+
+            <p class="detail-desc">@p.Description</p>
+
+            <!-- Boyut -->
+            <div class="detail-option">
+                <div class="detail-option-label">Boyut <span id="selectedSize">30 ml</span></div>
+                <div class="size-btns">
+                    <button class="size-btn active" onclick="selectSize(this,'30 ml')">30 ml</button>
+                    <button class="size-btn" onclick="selectSize(this,'50 ml')">50 ml</button>
+                    <button class="size-btn" onclick="selectSize(this,'100 ml')">100 ml</button>
+                </div>
+            </div>
+
+            <!-- Adet -->
+            <div class="detail-qty">
+                <div class="detail-option-label">Adet</div>
+                <div class="qty-control">
+                    <button class="qty-ctrl-btn" onclick="changeQty(-1)">−</button>
+                    <input class="qty-ctrl-num" id="detailQty" type="number" value="1" min="1" readonly />
+                    <button class="qty-ctrl-btn" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="detail-cta">
+                <button class="detail-atc" onclick=addToCart(@p.Id)>Sepete Ekle</button>
+                <button class="detail-wish" onclick=toggleFavorite(@p.Id, this)>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                    Favorilere Ekle
+                </button>
+            </div>
+
+            <!-- Meta -->
+            <div class="detail-meta">
+                <div class="detail-meta-row">
+                    <span class="detail-meta-key">Kategori</span>
+                    <span class="detail-meta-val">@catLabel</span>
+                </div>
+                <div class="detail-meta-row">
+                    <span class="detail-meta-key">Marka</span>
+                    <span class="detail-meta-val">@p.Brand</span>
+                </div>
+                <div class="detail-meta-row">
+                    <span class="detail-meta-key">Stok</span>
+                    <span class="detail-meta-val">@p.Stock adet</span>
+                </div>
+                <div class="detail-meta-row">
+                    <span class="detail-meta-key">Ürün Kodu</span>
+                    <span class="detail-meta-val">FL-@p.Id.ToString("D4")</span>
+                </div>
+                <div class="detail-meta-row">
+                    <span class="detail-meta-key">Kargo</span>
+                    <span class="detail-meta-val" style="color:var(--dark-sage)">Ücretsiz (500₺ üzeri)</span>
+                </div>
+            </div>
+
+            <!-- Accordion -->
+            <div class="detail-accordion">
+                <div class="accordion-item open">
+                    <button class="accordion-btn" onclick="toggleAccordion(this)">
+                        Ürün Açıklaması <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">@p.Description</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" onclick="toggleAccordion(this)">
+                        İçerik Listesi <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            Aqua, Glycerin, Niacinamide, Panthenol, Allantoin, Rosa Damascena Extract, Vitamin E, Hyaluronic Acid, Aloe Barbadensis Leaf Juice.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" onclick="toggleAccordion(this)">
+                        Nasıl Kullanılır? <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Cildini temizledikten sonra uygulayın.</li>
+                                <li>Birkaç damla avucunuza alın ve yüzünüze nazikçe masaj yaparak yedirin.</li>
+                                <li>Sabah ve akşam düzenli olarak kullanın.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-btn" onclick="toggleAccordion(this)">
+                        Kargo &amp; İade <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>500₺ üzeri siparişlerde ücretsiz kargo.</li>
+                                <li>1-3 iş günü içinde kargoya verilir.</li>
+                                <li>30 gün içinde koşulsuz iade hakkı.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İLGİLİ ÜRÜNLER -->
+    @if (related.Any())
+    {
+        <section class="related-section">
+            <div class="s-header" style="margin-bottom:32px">
+                <p class="s-label">Önerilenler</p>
+                <h2 class="s-title">Bunları da <em>Beğenebilirsin</em></h2>
+            </div>
+            <div class="products-grid" style="grid-template-columns:repeat(4,1fr)">
+                @foreach (var r in related)
+                {
+                    <div class="p-card">
+                        <div class="p-img-wrap">
+                            <a href=@Url.Action("Detail", "Products", new { id = r.Id })>
+                                <img class="p-img" src=@r.ImageUrl alt="@r.Name" loading="lazy" />
+                            </a>
+                        </div>
+                        <p class="p-brand">@r.Brand</p>
+                        <h3 class="p-name"><a href=@Url.Action("Detail", "Products", new { id = r.Id })>@r.Name</a></h3>
+                        <div class="p-price"><span class="pp-new">₺@r.Price.ToString("N0")</span></div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+}
+@section Scripts {
+    <script src="~/js/products-detail.js"></script>
+}

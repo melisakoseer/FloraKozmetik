@@ -1,0 +1,33 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Kullanıcılar";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var users = ViewBag.Users as List<ApplicationUser> ?? new List<ApplicationUser>();
+}
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Avatar</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Üyelik Tarihi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in users)
+            {
+                var initials = $"{u.FirstName?.FirstOrDefault()}{u.LastName?.FirstOrDefault()}".ToUpper();
+                <tr>
+                    <td>
+                        <div class="profile-avatar" style="width:36px;height:36px;font-size:13px">@initials</div>
+                    </td>
+                    <td style="font-weight:500">@u.FirstName @u.LastName</td>
+                    <td style="color:#777">@u.Email</td>
+                    <td style="font-size:13px;color:#999">@u.CreatedAt.ToString("dd.MM.yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

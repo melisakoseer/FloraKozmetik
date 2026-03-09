@@ -1,0 +1,100 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Favorilerim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var favorites = ViewBag.Favorites as List<Favorite> ?? new List<Favorite>();
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Ana Sayfa</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Favorilerim</span>
+</div>
+
+<div class="page-header" style="padding:48px 40px 32px">
+    <h1 class="page-title">Favorilerim</h1>
+    <p class="page-subtitle">@favorites.Count ürün</p>
+</div>
+
+@if (!favorites.Any())
+{
+    <div class="profile-empty" style="padding:80px 40px">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <p>Henüz favori ürününüz yok.</p>
+        <a href="@Url.Action("Index", "Products", new { category = "skincare" })" class="profile-empty-btn">Alışverişe Başla</a>
+    </div>
+}
+else
+{
+    <div class="catalog-grid" style="padding:0 40px 80px">
+        @foreach (var fav in favorites)
+        {
+            var p = fav.Product!;
+            var disc = p.OriginalPrice.HasValue ? (int)Math.Round((1 - p.Price / p.OriginalPrice.Value) * 100) : 0;
+            <div class="p-card" id="fav-card-@fav.ProductId">
+                <div class="p-img-wrap">
+                    <a href="@Url.Action("Detail", "Products", new { id = p.Id })">
+                        <img class="p-img" src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                    </a>
+                    @if (p.OriginalPrice.HasValue)
+                    {
+                        <div class="p-badge badge-sale">-%@disc</div>
+                    }
+                    <div class="p-actions">
+                        <button class="p-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                        <a class="p-quick" href="@Url.Action("Detail", "Products", new { id = p.Id })">Detayı Gör</a>
+                    </div>
+                    <button class="p-wish active" id="pw@(p.Id)" onclick="removeFavorite(@p.Id, @fav.ProductId)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-card-right">
+                    <div>
+                        <p class="p-brand">@p.Brand</p>
+                        <h3 class="p-name">
+                            <a href="@Url.Action("Detail", "Products", new { id = p.Id })">@p.Name</a>
+                        </h3>
+                    </div>
+                    <div>
+                        <div class="p-price">
+                            <span class="pp-new">₺@p.Price.ToString("N0")</span>
+                            @if (p.OriginalPrice.HasValue)
+                            {
+                                <span class="pp-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                                <span class="pp-disc">-%@disc</span>
+                            }
+                        </div>
+                        <button class="list-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+    async function removeFavorite(productId, cardProductId) {
+        const res = await fetch('/Favorite/Toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `productId=${productId}`
+        });
+        const data = await res.json();
+        if (data.success && !data.isFavorited) {
+            document.getElementById('fav-card-' + cardProductId)?.remove();
+            refreshFavoriteCount();
+            showToast(data.message);
+
+            // Sayfada ürün kalmadıysa yenile
+            if (document.querySelectorAll('.p-card').length === 0) {
+                setTimeout(() => location.reload(), 800);
+            }
+        }
+    }
+</script>
+}

@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Yeni Ürün";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card" style="max-width:700px">
+    <form method="post" action="@Url.Action("CreateProduct", "Admin")" enctype="multipart/form-data">
+        <div class="admin-form-grid">
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Ürün Adı</label>
+                <input type="text" name="name" class="admin-input" required />
+            </div>
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Açıklama</label>
+                <textarea name="description" class="admin-input" rows="3"></textarea>
+            </div>
+            <div class="admin-form-group">
+                <label>Fiyat (₺)</label>
+                <input type="number" name="price" class="admin-input" step="0.01" required />
+            </div>
+            <div class="admin-form-group">
+                <label>Orijinal Fiyat (₺) — İndirim için</label>
+                <input type="number" name="originalPrice" class="admin-input" step="0.01" />
+            </div>
+            <div class="admin-form-group">
+                <label>Kategori</label>
+                <select name="category" class="admin-input" required>
+                    <option value="skincare">Yüz Bakımı</option>
+                    <option value="fragrances">Parfümler</option>
+                    <option value="beauty">Makyaj</option>
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label>Marka</label>
+                <select name="brand" class="admin-input">
+                    @foreach (var brand in ViewBag.Brands as List<string> ?? new List<string>())
+                    {
+                        <option value="@brand">@brand</option>
+                    }
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label>Stok</label>
+                <input type="number" name="stock" class="admin-input" required />
+            </div>
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Görsel</label>
+                <input type="file" name="imageFile" class="admin-input" accept="image/*" />
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px">
+            <button type="submit" class="admin-btn primary">Kaydet</button>
+            <a href="@Url.Action("Products", "Admin")" class="admin-btn">İptal</a>
+        </div>
+    </form>
+</div>

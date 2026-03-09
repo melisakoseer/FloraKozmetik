@@ -1,0 +1,134 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Ürünler";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+}
+
+<div class="admin-card">
+    <div class="admin-card-head">
+        <div style="display:flex;gap:12px;align-items:center">
+            <form method="get" style="display:flex;gap:8px">
+                <input type="text" name="search" class="admin-input" placeholder="Ürün ara..." value="@ViewBag.Search" style="width:200px" />
+                <select name="category" class="admin-input">
+                    <option value="">Tüm Kategoriler</option>
+                    <option value="skincare"   selected="@(ViewBag.Category == "skincare"   ? "selected" : null)">Yüz Bakımı</option>
+                    <option value="fragrances" selected="@(ViewBag.Category == "fragrances" ? "selected" : null)">Parfümler</option>
+                    <option value="beauty"     selected="@(ViewBag.Category == "beauty"     ? "selected" : null)">Makyaj</option>
+                </select>
+                <button type="submit" class="admin-btn">Filtrele</button>
+            </form>
+        </div>
+        <a href="@Url.Action("CreateProduct", "Admin")" class="admin-btn primary">+ Yeni Ürün</a>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Görsel</th>
+                <th>Ürün Adı</th>
+                <th>Kategori</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td><img src="@p.ImageUrl" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#f5f5f5" /></td>
+                    <td>
+                        <div style="font-weight:500;font-size:14px">@p.Name</div>
+                        <div style="font-size:12px;color:#999">@p.Brand</div>
+                    </td>
+                    <td>
+                        <span class="category-badge category-@p.Category">
+                            @(p.Category == "skincare" ? "Yüz Bakımı" : p.Category == "fragrances" ? "Parfüm" : "Makyaj")
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;flex-direction:column;line-height:1.2">
+
+                            <div style="font-weight:600;font-size:15px">
+                                ₺@p.Price.ToString("N2")
+                            </div>
+
+                            @if (p.OriginalPrice.HasValue)
+                            {
+                                <div style="font-size:13px;color:#999;text-decoration:line-through">
+                                    ₺@p.OriginalPrice.Value.ToString("N2")
+                                </div>
+                            }
+
+                        </div>
+                    </td>
+                    <td><span class="stock-badge @(p.Stock == 0 ? "stock-out" : p.Stock < 10 ? "stock-low" : "stock-ok")">@p.Stock</span></td>
+                    <td><span class="status-badge @(p.IsActive ? "active" : "inactive")">@(p.IsActive ? "Aktif" : "Pasif")</span></td>
+                    <td>
+                        <div style="display:flex;gap:8px">
+                            <a href="@Url.Action("EditProduct", "Admin", new { id = p.Id })" class="admin-btn sm">Düzenle</a>
+
+                            @if (p.OriginalPrice.HasValue)
+                            {
+                                <form method="post" action="@Url.Action("RemoveDiscount", "Admin")">
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="submit" class="admin-btn sm">İndirimi Kaldır</button>
+                                </form>
+                            }
+
+                            @if (p.IsActive)
+                            {
+                                <form method="post" action="@Url.Action("DeleteProduct", "Admin")" id="deleteForm-@p.Id">
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="button" class="admin-btn sm danger" onclick="openDeleteModal(@p.Id)">Pasife Al</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="admin-btn sm" disabled style="opacity:.4;cursor:not-allowed">Pasif</button>
+                            }
+
+                            <form method="post" action="@Url.Action("HardDeleteProduct", "Admin")" id="hardDeleteForm-@p.Id">
+                                <input type="hidden" name="id" value="@p.Id" />
+                                <button type="button" class="admin-btn sm danger" onclick="openHardDeleteModal(@p.Id)">Sil</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Pasife Al Modal -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:14px;padding:32px;max-width:400px;width:90%;text-align:center">
+        <div style="width:56px;height:56px;background:#fce4ec;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+        </div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;margin:0 0 8px">Ürünü Pasife Al</h3>
+        <p style="color:#777;font-size:14px;margin:0 0 24px">Bu ürün sitede görünmez hale gelecek. Emin misiniz?</p>
+        <div style="display:flex;gap:12px;justify-content:center">
+            <button onclick="closeDeleteModal()" class="admin-btn">İptal</button>
+            <button onclick="confirmDelete()" class="admin-btn danger">Pasife Al</button>
+        </div>
+    </div>
+</div>
+<!-- Pasife Al Modal -->
+<div id="hardDeleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:14px;padding:32px;max-width:400px;width:90%;text-align:center">
+        <div style="width:56px;height:56px;background:#fce4ec;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+        </div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;margin:0 0 8px">Ürünü Sil</h3>
+        <p style="color:#777;font-size:14px;margin:0 0 24px">Bu ürün <strong>kalıcı olarak silinecek</strong>. Bu işlem geri alınamaz.</p>
+        <div style="display:flex;gap:12px;justify-content:center">
+            <button onclick="closeHardDeleteModal()" class="admin-btn">İptal</button>
+            <button onclick="confirmHardDelete()" class="admin-btn danger">Kalıcı Sil</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/admin-products.js"></script>
+}

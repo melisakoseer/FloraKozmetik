@@ -1,0 +1,63 @@
+@model FloraKozmetik.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <h1 class="auth-logo">FLORA</h1>
+            <p class="auth-subtitle">Hesabına giriş yap</p>
+        </div>
+
+        <form asp-action="Login" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="auth-error"></div>
+
+            <div class="form-group">
+                <label asp-for="Email">E-posta</label>
+                <input asp-for="Email" class="form-input" placeholder="ornek@email.com" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password">Şifre</label>
+                <div class="input-eye-wrap">
+                    <input asp-for="Password" class="form-input" id="loginPassword" placeholder="••••••" />
+                    <button type="button" class="eye-btn" onclick="togglePass('loginPassword', this)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+
+            <div class="form-check-row">
+                <label class="check-label">
+                    <input asp-for="RememberMe" type="checkbox" />
+                    <span>Beni Hatırla</span>
+                </label>
+                <a href="@Url.Action("ForgotPassword", "Account")" style="font-size:13px;color:var(--dark-sage)">Şifremi Unuttum</a>
+            </div>
+
+            <button type="submit" class="auth-btn">Giriş Yap</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Hesabın yok mu? <a asp-action="Register" asp-controller="Account">Kayıt Ol</a></p>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePass(id, btn) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+}

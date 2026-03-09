@@ -1,0 +1,180 @@
+﻿@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = ViewBag.Label;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+    string currentSort = ViewBag.Sort ?? "";
+    string currentCategory = ViewBag.Category ?? "skincare";
+}
+<div class="breadcrumb">
+    <a href=@Url.Action("Index", "Home")>Ana Sayfa</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">@ViewBag.Label</span>
+</div>
+
+<div class="cat-hero">
+    <div class="cat-hero-bg @ViewBag.HeroBg"></div>
+    <div class="cat-hero-overlay"></div>
+    <div class="cat-hero-content">
+        <p class="cat-hero-label">Kategori</p>
+        <h1 class="cat-hero-title">@ViewBag.Label</h1>
+        <p class="cat-hero-desc">@ViewBag.HeroDesc</p>
+    </div>
+    <div class="cat-hero-count">
+        <div class="cat-hero-count-num">@ViewBag.Count</div>
+        <div class="cat-hero-count-lbl">Ürün</div>
+    </div>
+
+    @if (ViewBag.HeroImg != null)
+    {
+        <img src="@ViewBag.HeroImg" class="cat-hero-img" alt="" />
+    }
+</div>
+
+<div class="catalog-layout">
+    <aside class="filter-panel">
+        <form method="get" asp-action="Index" asp-controller="Products" id="filterForm">
+            <input type="hidden" name="category" value="@ViewBag.Category" />
+            <<input type="hidden" name="sort" value="@ViewBag.Sort" id="sortHidden" />
+
+            <div class="filter-panel-title">
+                Filtreler
+                <a href=@Url.Action("Index", "Products", new { category = ViewBag.Category }) class="filter-clear">Temizle</a>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-group-title">Fiyat Aralığı</div>
+                <div class="filter-group-body">
+                    <div class="price-range-wrap">
+                        <div class="price-inputs">
+                            <input class="price-input" name="minPrice" type="number" placeholder="Min ₺" value=@ViewBag.MinPrice />
+                            <span class="price-sep">—</span>
+                            <input class="price-input" name="maxPrice" type="number" placeholder="Max ₺" value=@ViewBag.MaxPrice/>
+                        </div>
+                        <button type="submit" class="price-apply">Uygula</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </aside>
+
+    <div class="catalog-main">
+        <div class="catalog-topbar">
+            <div class="catalog-count">
+                <strong>@ViewBag.Count</strong> ürün listeleniyor
+            </div>
+            <div class="catalog-view-sort">
+                <div class="view-toggle">
+                    <button class="view-btn active" id="view-grid" onclick="setView('grid')" title="Grid">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                    </button>
+                    <button class="view-btn" id="view-list" onclick="setView('list')" title="Liste">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                </div>
+                <select class="catalog-sort" onchange="changeSort(this.value)">
+                    <option value="" selected="@(currentSort == "" ? "selected" : null)">Önerilen</option>
+                    <option value="price-asc" selected="@(currentSort == "price-asc" ? "selected" : null)">Fiyat: Düşük → Yüksek</option>
+                    <option value="price-desc" selected="@(currentSort == "price-desc" ? "selected" : null)">Fiyat: Yüksek → Düşük</option>
+                    <option value="newest" selected="@(currentSort == "newest" ? "selected" : null)">En Yeni</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid">
+            @if (!products.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-state-title">Ürün bulunamadı</div>
+                    <p class="empty-state-desc">Filtrelerinizi değiştirerek tekrar deneyin.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var p in products)
+                {
+                    var disc = p.OriginalPrice.HasValue ? (int)Math.Round((1 - p.Price / p.OriginalPrice.Value) * 100) : 0;
+                    <div class="p-card">
+                        <div class="p-img-wrap">
+                            <a href=@Url.Action("Detail", "Products", new { id = p.Id })>
+                                <img class="p-img" src=@p.ImageUrl alt=@p.Name loading="lazy" />
+                            </a>
+                            @if (p.OriginalPrice.HasValue)
+                            {
+                                <div class="p-badge badge-sale">-%@disc</div>
+                            }
+                            <div class="p-actions">
+                                <button class="p-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                                <a class="p-quick" href=@Url.Action("Detail", "Products", new { id = p.Id })>Detayı Gör</a>
+                            </div>
+                            <button class="p-wish" id="pw@(p.Id)" onclick="toggleFavorite(@p.Id, this)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </button>
+                        </div>
+                        <div class="p-card-right">
+                            <div>
+                                <p class="p-brand">@p.Brand</p>
+                                <h3 class="p-name"><a href="@Url.Action("Detail", "Products", new { id = p.Id })">@p.Name</a></h3>
+                                <p class="p-desc">@p.Description</p>
+                            </div>
+                            <div>
+                                <div class="p-price">
+                                    <span class="pp-new">₺@p.Price.ToString("N0")</span>
+                                    @if (p.OriginalPrice.HasValue)
+                                    {
+                                        <span class="pp-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                                        <span class="pp-disc">-%@disc</span>
+                                    }
+                                </div>
+                                <button class="list-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        @if (ViewBag.TotalPages > 1)
+        {
+            int currentPage = ViewBag.Page;
+            int totalPages = ViewBag.TotalPages;
+            <div class="pagination">
+                @if (currentPage > 1)
+                {
+                    <a href="@Url.Action("Index", "Products", new { category = currentCategory, sort = currentSort, page = currentPage - 1 })" class="page-btn">‹</a>
+                }
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <a href="@Url.Action("Index", "Products", new { category = currentCategory, sort = currentSort, page = i })"
+                       class="page-btn @(currentPage == i ? "active" : "")">@i</a>
+                }
+                @if (currentPage < totalPages)
+                {
+                    <a href="@Url.Action("Index", "Products", new { category = currentCategory, sort = currentSort, page = currentPage + 1 })" class="page-btn">›</a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function changeSort(val) {
+            document.getElementById('sortHidden').value = val;
+            document.getElementById('filterForm').submit();
+        }
+        function setView(mode) {
+            const grid = document.getElementById('catalogGrid');
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + mode).classList.add('active');
+            grid.classList.toggle('list-view', mode === 'list');
+            // View modunu localStorage'a kaydet
+            localStorage.setItem('catalogView', mode);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedView = localStorage.getItem('catalogView');
+            if (savedView === 'list') {
+                setView('list');
+            }
+        });
+    </script>
+}

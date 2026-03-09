@@ -1,0 +1,105 @@
+﻿@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var order = ViewBag.Order as Order;
+}
+
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:24px">
+    <a href="@Url.Action("Orders", "Admin")" class="admin-btn">← Siparişlere Dön</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px">
+
+    <!-- SOL: ÜRÜNLER -->
+    <div>
+        <div class="admin-card">
+            <div class="admin-card-head">
+                <h3>Sipariş Ürünleri</h3>
+                <span class="order-status order-status--@order?.Status.ToLower()">@order?.Status</span>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Görsel</th>
+                        <th>Ürün</th>
+                        <th>Adet</th>
+                        <th>Birim Fiyat</th>
+                        <th>Toplam</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order?.OrderItems ?? new List<OrderItem>())
+                    {
+                        <tr>
+                            <td><img src="@item.ProductImage" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#f5f5f5" /></td>
+                            <td style="font-weight:500">@item.ProductName</td>
+                            <td>@item.Quantity</td>
+                            <td>₺@item.UnitPrice.ToString("N2")</td>
+                            <td style="font-weight:600">₺@((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DURUM GÜNCELLE -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3>Durum Güncelle</h3></div>
+            <form method="post" action="@Url.Action("UpdateOrderStatus", "Admin")" style="display:flex;gap:12px;align-items:center">
+                <input type="hidden" name="returnTo" value="detail" />
+                <input type="hidden" name="orderId" value="@order?.Id" />
+                <select name="status" class="admin-input" style="width:200px">
+                    @foreach (var s in new[] { "Bekliyor", "Paketlendi", "Kargolandı", "Tamamlandı", "İptal" })
+                    {
+                        <option value="@s" selected="@(order?.Status == s ? "selected" : null)">@s</option>
+                    }
+                </select>
+                <button type="submit" class="admin-btn primary">Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SAĞ: ÖZET -->
+    <div style="display:flex;flex-direction:column;gap:24px">
+
+        <!-- MÜŞTERİ -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3>Müşteri</h3></div>
+            <div style="font-size:14px;display:flex;flex-direction:column;gap:8px">
+                <div><span style="color:#999">Ad Soyad:</span> @(order?.User?.FirstName + " " + order?.User?.LastName)</div>
+                <div><span style="color:#999">E-posta:</span> @order?.User?.Email</div>
+                <div><span style="color:#999">Sipariş Tarihi:</span> @order?.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+            </div>
+        </div>
+
+        <!-- TESLİMAT ADRESİ -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3>Teslimat Adresi</h3></div>
+            <p style="font-size:14px;color:#555;line-height:1.6;margin:0">@order?.ShippingAddress</p>
+        </div>
+
+        <!-- TUTAR -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3>Ödeme Özeti</h3></div>
+            <div style="font-size:14px;display:flex;flex-direction:column;gap:10px">
+                @if (!string.IsNullOrEmpty(order?.CouponCode))
+                {
+                    <div style="display:flex;justify-content:space-between">
+                        <span style="color:#999">Kupon</span>
+                        <span style="color:#5a7a5a">@order.CouponCode</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between">
+                        <span style="color:#999">İndirim</span>
+                        <span style="color:#c62828">-₺@order.DiscountAmount.ToString("N2")</span>
+                    </div>
+                }
+                <div style="display:flex;justify-content:space-between;font-weight:600;font-size:16px;padding-top:8px;border-top:1px solid #f0f0f0">
+                    <span>Toplam</span>
+                    <span>₺@order?.TotalAmount.ToString("N2")</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

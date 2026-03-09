@@ -1,0 +1,125 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Fırsatlar";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var discounted = ViewBag.Discounted as List<Product> ?? new List<Product>();
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Ana Sayfa</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Fırsatlar</span>
+</div>
+
+<!-- HERO -->
+<div class="deals-hero">
+    <div class="deals-hero-content">
+        <p class="cat-hero-label">Özel İndirimler</p>
+        <h1 class="deals-hero-title"><em>Fırsatları </em> Kaçırma</h1>
+        <p class="deals-hero-desc">Seçili ürünlerde sınırlı süreli indirimler. Stoklar tükenebilir!</p>
+    </div>
+    <div class="deals-hero-stats">
+        <div class="deals-stat">
+            <div class="deals-stat-num">@discounted.Count</div>
+            <div class="deals-stat-lbl">İndirimli Ürün</div>
+        </div>
+        <div class="deals-stat">
+            <div class="deals-stat-num">%@((int)discounted.Average(p => Math.Round((1 - p.Price / p.OriginalPrice!.Value) * 100)))</div>
+            <div class="deals-stat-lbl">Ortalama İndirim</div>
+        </div>
+        <div class="deals-stat">
+            <div class="deals-stat-num">₺@((int)discounted.Sum(p => p.OriginalPrice!.Value - p.Price))</div>
+            <div class="deals-stat-lbl">Toplam Tasarruf</div>
+        </div>
+    </div>
+</div>
+
+<!-- KUPON BANNER -->
+<div class="coupon-banner">
+    <div class="coupon-banner-left">
+        <p class="coupon-tag">İlk Siparişe Özel</p>
+        <h3 class="coupon-title">FLORA15 koduyla ek %15 indirim!</h3>
+        <p class="coupon-desc">İlk siparişinizde sepete uygulayın, anında kazanın.</p>
+    </div>
+    <div class="coupon-code-wrap">
+        <span class="coupon-code">FLORA15</span>
+        <button class="coupon-copy" onclick="copyCoupon()">Kopyala</button>
+    </div>
+</div>
+
+<!-- ÜRÜNLER -->
+<div style="padding: 48px 40px 80px">
+    <div class="catalog-topbar" style="margin-bottom:24px">
+        <div class="catalog-count"><strong>@discounted.Count</strong> indirimli ürün</div>
+        <select class="catalog-sort" onchange="sortDeals(this.value)" id="dealSort">
+            <option value="disc-desc">En Yüksek İndirim</option>
+            <option value="price-asc">Fiyat: Düşük → Yüksek</option>
+            <option value="price-desc">Fiyat: Yüksek → Düşük</option>
+        </select>
+    </div>
+
+    <div class="products-grid" id="dealsGrid">
+        @foreach (var p in discounted)
+        {
+            var disc = (int)Math.Round((1 - p.Price / p.OriginalPrice!.Value) * 100);
+            var saved = (int)(p.OriginalPrice.Value - p.Price);
+            <div class="p-card" 
+                 data-price="@p.Price" 
+                 data-disc="@disc"
+                 data-origprice="@p.OriginalPrice.Value">
+                <div class="p-img-wrap">
+                    <a href="@Url.Action("Detail", "Products", new { id = p.Id })">
+                        <img class="p-img" src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                    </a>
+                    <div class="p-badge badge-sale">-%@disc</div>
+                    <div class="deals-save-badge">₺@saved tasarruf</div>
+                    <div class="p-actions">
+                        <button class="p-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                        <a class="p-quick" href="@Url.Action("Detail", "Products", new { id = p.Id })">Detayı Gör</a>
+                    </div>
+                    <button class="p-wish" id="pw@(p.Id)" onclick="toggleFavorite(@p.Id, this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </button>
+                </div>
+                <div class="p-card-right">
+                    <div>
+                        <p class="p-brand">@p.Brand</p>
+                        <h3 class="p-name"><a href="@Url.Action("Detail", "Products", new { id = p.Id })">@p.Name</a></h3>
+                        <p class="p-desc">@p.Description</p>
+                    </div>
+                    <div>
+                        <div class="p-price">
+                            <span class="pp-new">₺@p.Price.ToString("N0")</span>
+                            <span class="pp-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                            <span class="pp-disc">-%@disc</span>
+                        </div>
+                        <button class="list-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function copyCoupon() {
+        navigator.clipboard.writeText('FLORA15');
+        showToast('Kupon kodu kopyalandı: FLORA15');
+    }
+
+    function sortDeals(val) {
+        const grid = document.getElementById('dealsGrid');
+        const cards = [...grid.querySelectorAll('.p-card')];
+
+        cards.sort((a, b) => {
+            if (val === 'price-asc')  return +a.dataset.price - +b.dataset.price;
+            if (val === 'price-desc') return +b.dataset.price - +a.dataset.price;
+            if (val === 'disc-desc')  return +b.dataset.disc  - +a.dataset.disc;
+            return 0;
+        });
+
+        cards.forEach(c => grid.appendChild(c));
+    }
+</script>
+}

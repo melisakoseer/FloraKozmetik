@@ -1,0 +1,66 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Sipariş Alındı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var order = ViewBag.Order as Order;
+}
+
+<div class="success-wrap">
+    <div class="success-card">
+        <div class="success-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#5a7a5a" stroke-width="1.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <h1 class="success-title">Siparişiniz Alındı!</h1>
+        <p class="success-desc">Teşekkürler! Siparişiniz başarıyla oluşturuldu.</p>
+
+        @if (order != null)
+        {
+            <div class="success-order-info">
+                <div class="success-info-row">
+                    <span>Sipariş No</span>
+                    <strong>#@order.Id.ToString("D6")</strong>
+                </div>
+                <div class="success-info-row">
+                    <span>Toplam Tutar</span>
+                    <strong>₺@order.TotalAmount.ToString("N0")</strong>
+                </div>
+                @if (order.DiscountAmount > 0)
+                {
+                    <div class="success-info-row">
+                        <span>İndirim</span>
+                        <strong style="color:#5a7a5a">-₺@order.DiscountAmount.ToString("N0")</strong>
+                    </div>
+                }
+                <div class="success-info-row">
+                    <span>Ödeme</span>
+                    <strong>@order.PaymentMethod</strong>
+                </div>
+                <div class="success-info-row">
+                    <span>Durum</span>
+                    <strong>@order.Status</strong>
+                </div>
+            </div>
+
+            <div class="success-items">
+                @foreach (var item in order.OrderItems)
+                {
+                    <div class="success-item">
+                        <img src="@item.ProductImage" alt="@item.ProductName" />
+                        <div>
+                            <p class="success-item-name">@item.ProductName</p>
+                            <p class="success-item-price">x@item.Quantity · ₺@item.UnitPrice.ToString("N0")</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="success-actions">
+            <a href="@Url.Action("Index", "Account")" class="profile-save-btn">Siparişlerimi Gör</a>
+            <a href="@Url.Action("Index", "Home")" class="profile-cancel-btn">Ana Sayfaya Dön</a>
+        </div>
+    </div>
+</div>

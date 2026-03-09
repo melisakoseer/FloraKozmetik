@@ -1,0 +1,75 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Ürün Düzenle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var p = ViewBag.Product as Product;
+}
+
+<div class="admin-card" style="max-width:700px">
+    <form method="post" action="@Url.Action("EditProduct", "Admin")" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="@p?.Id" />
+        <input type="hidden" name="originalPrice" id="originalPriceHidden" value="@p?.OriginalPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+        <div class="admin-form-grid">
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Ürün Adı</label>
+                <input type="text" name="name" class="admin-input" value="@p?.Name" required />
+            </div>
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Açıklama</label>
+                <textarea name="description" class="admin-input" rows="3">@p?.Description</textarea>
+            </div>
+            <div class="admin-form-group">
+                <label>Fiyat (₺)</label>
+                <input type="text" name="price" class="admin-input" id="priceInput"
+                       value="@p?.Price.ToString("N2", new System.Globalization.CultureInfo("tr-TR"))" required />
+                <input type="hidden" name="originalPrice" id="originalPriceHidden"
+                       value="@p?.OriginalPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+            </div>
+            <div class="admin-form-group">
+                <label>İndirim Oranı (%)</label>
+                <input type="number" name="discountRate" class="admin-input" min="0" max="90" value="0" />
+            </div>
+            <div class="admin-form-group">
+                <label>Kategori</label>
+                <select name="category" class="admin-input">
+                    <option value="skincare"   selected="@(p?.Category == "skincare"   ? "selected" : null)">Yüz Bakımı</option>
+                    <option value="fragrances" selected="@(p?.Category == "fragrances" ? "selected" : null)">Parfümler</option>
+                    <option value="beauty"     selected="@(p?.Category == "beauty"     ? "selected" : null)">Makyaj</option>
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label>Marka</label>
+                <select name="brand" class="admin-input">
+                    @foreach (var brand in ViewBag.Brands as List<string> ?? new List<string>())
+                    {
+                        <option value="@brand" selected="@(p?.Brand == brand ? "selected" : null)">@brand</option>
+                    }
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label>Stok</label>
+                <input type="number" name="stock" class="admin-input" value="@p?.Stock" />
+            </div>
+            <div class="admin-form-group" style="grid-column:1/-1">
+                <label>Görsel — Değiştirmek için yeni dosya seç</label>
+                <img src="@p?.ImageUrl" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block" />
+                <input type="file" name="imageFile" class="admin-input" accept="image/*" />
+                <input type="hidden" name="imageUrl" value="@p?.ImageUrl" />
+            </div>
+            <div class="admin-form-group">
+                <label>Durum</label>
+                <select name="isActive" class="admin-input">
+                    <option value="true"  selected="@(p?.IsActive == true  ? "selected" : null)">Aktif</option>
+                    <option value="false" selected="@(p?.IsActive == false ? "selected" : null)">Pasif</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px">
+            <button type="submit" class="admin-btn primary">Güncelle</button>
+            <a href="@Url.Action("Products", "Admin")" class="admin-btn">İptal</a>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <script src="~/js/admin-edit.js"></script>
+}

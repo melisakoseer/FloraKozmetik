@@ -1,0 +1,107 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var recentOrders = ViewBag.RecentOrders as List<Order> ?? new List<Order>();
+    var lowStock = ViewBag.LowStockProducts as List<Product> ?? new List<Product>();
+}
+
+<!-- STAT KARTLARI -->
+<div class="admin-stats">
+    <div class="admin-stat-card">
+        <div class="admin-stat-icon green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div>
+            <div class="admin-stat-num">@ViewBag.TotalProducts</div>
+            <div class="admin-stat-lbl">Toplam Ürün</div>
+        </div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-icon blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        </div>
+        <div>
+            <div class="admin-stat-num">@ViewBag.TotalOrders</div>
+            <div class="admin-stat-lbl">Toplam Sipariş</div>
+        </div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-icon purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div>
+            <div class="admin-stat-num">@ViewBag.TotalUsers</div>
+            <div class="admin-stat-lbl">Toplam Kullanıcı</div>
+        </div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-icon gold">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+            <div class="admin-stat-num">₺@(((decimal)ViewBag.TotalRevenue).ToString("N0"))</div>
+            <div class="admin-stat-lbl">Toplam Gelir</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-grid-2">
+    <!-- SON SİPARİŞLER -->
+    <div class="admin-card">
+        <div class="admin-card-head">
+            <h3>Son Siparişler</h3>
+            <a href="@Url.Action("Orders", "Admin")" class="admin-link">Tümünü Gör</a>
+        </div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Sipariş No</th>
+                    <th>Müşteri</th>
+                    <th>Tutar</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in recentOrders)
+                {
+                    <tr>
+                        <td>#@order.Id.ToString("D6")</td>
+                        <td>@(order.User?.FirstName + " " + order.User?.LastName)</td>
+                        <td>₺@order.TotalAmount.ToString("N0")</td>
+                        <td><span class="order-status order-status--@order.Status.ToLower()">@order.Status</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DÜŞÜK STOK -->
+    <div class="admin-card">
+        <div class="admin-card-head">
+            <h3>Düşük Stok Uyarısı</h3>
+            <a href="@Url.Action("Products", "Admin")" class="admin-link">Ürünlere Git</a>
+        </div>
+        @if (!lowStock.Any())
+        {
+            <p style="color:#999;font-size:14px;padding:20px 0">Düşük stoklu ürün yok.</p>
+        }
+        else
+        {
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Ürün</th><th>Stok</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in lowStock)
+                    {
+                        <tr>
+                            <td>@p.Name</td>
+                            <td><span class="stock-badge @(p.Stock == 0 ? "stock-out" : "stock-low")">@p.Stock</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -1,0 +1,270 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = ViewBag.User as ApplicationUser;
+    var orders = ViewBag.Orders as List<Order> ?? new List<Order>();
+    var addresses = ViewBag.Addresses as List<Address> ?? new List<Address>();
+}
+<div class="profile-layout">
+
+    <!-- SOL MENÜ -->
+    <aside class="profile-sidebar">
+        <div class="profile-sidebar-user">
+            <div class="profile-avatar">@user?.FirstName?[0]@user?.LastName?[0]</div>
+            <div>
+                <p class="profile-name">@user?.FirstName @user?.LastName</p>
+                <p class="profile-email">@user?.Email</p>
+            </div>
+        </div>
+        <nav class="profile-nav">
+            <button class="profile-nav-item active" onclick="switchTab('info', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                Kişisel Bilgiler
+            </button>
+            <button class="profile-nav-item" onclick="switchTab('orders', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                Siparişlerim
+                @if (orders.Any())
+                {
+                    <span class="profile-nav-badge">@orders.Count</span>
+                }
+            </button>
+            <button class="profile-nav-item" onclick="switchTab('addresses', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                Adreslerim
+            </button>
+            <button class="profile-nav-item" onclick="switchTab('security', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                Güvenlik
+            </button>
+        </nav>
+        <form asp-action="Logout" asp-controller="Account" method="post" style="margin-top:auto">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="profile-logout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                Çıkış Yap
+            </button>
+        </form>
+    </aside>
+
+    <!-- SAĞ İÇERİK -->
+    <div class="profile-content">
+
+        <!-- KİŞİSEL BİLGİLER -->
+        <div class="profile-tab active" id="tab-info">
+            <div class="profile-section-head">
+                <h2>Kişisel Bilgiler</h2>
+                <button class="profile-edit-btn" onclick="toggleEdit()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                    Düzenle
+                </button>
+            </div>
+
+            <!-- GÖRÜNTÜLEME MODU -->
+            <div id="infoView">
+                <div class="profile-info-grid">
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Ad</span>
+                        <span class="profile-info-val">@user?.FirstName</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Soyad</span>
+                        <span class="profile-info-val">@user?.LastName</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">E-posta</span>
+                        <span class="profile-info-val">@user?.Email</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Telefon</span>
+                        <span class="profile-info-val">@(user?.PhoneNumber ?? "—")</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Doğum Tarihi</span>
+                        <span class="profile-info-val">@(user?.BirthDate?.ToString("dd MMMM yyyy") ?? "—")</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Cinsiyet</span>
+                        <span class="profile-info-val">@(user?.Gender ?? "—")</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Üyelik Tarihi</span>
+                        <span class="profile-info-val">@user?.CreatedAt.ToString("MMMM yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DÜZENLEME MODU -->
+            <div id="infoEdit" style="display:none">
+                <div class="profile-info-grid">
+                    <div class="profile-form-group">
+                        <label>Ad</label>
+                        <input class="profile-input" id="editFirstName" value="@user?.FirstName" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Soyad</label>
+                        <input class="profile-input" id="editLastName" value="@user?.LastName" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Telefon</label>
+                        <input class="profile-input" id="editPhone" value="@user?.PhoneNumber" placeholder="05XX XXX XX XX" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Cinsiyet</label>
+                        <select class="profile-input" id="editGender">
+                            <option value="Kadın" selected="@(user?.Gender == "Kadın" ? "selected" : null)">Kadın</option>
+                            <option value="Erkek" selected="@(user?.Gender == "Erkek" ? "selected" : null)">Erkek</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="profile-form-actions">
+                    <button class="profile-save-btn" onclick="saveProfile()">Kaydet</button>
+                    <button class="profile-cancel-btn" onclick="toggleEdit()">İptal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SİPARİŞLERİM -->
+        <div class="profile-tab" id="tab-orders">
+            <div class="profile-section-head">
+                <h2>Siparişlerim</h2>
+            </div>
+            @if (!orders.Any())
+            {
+                <div class="profile-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                    <p>Henüz siparişiniz yok.</p>
+                    <a href="@Url.Action("Index", "Products", new { category = "skincare" })" class="profile-empty-btn">Alışverişe Başla</a>
+                </div>
+            }
+            else
+            {
+                <div class="orders-list">
+                    @foreach (var order in orders)
+                    {
+                        <div class="order-card">
+                            <div class="order-card-head">
+                                <div>
+                                    <span class="order-no">#@order.Id.ToString("D6")</span>
+                                    <span class="order-date">@order.CreatedAt.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <span class="order-status order-status--@order.Status.ToLower()">@order.Status</span>
+                            </div>
+                            <div class="order-card-body">
+                                <span>@order.OrderItems.Count ürün</span>
+                                <span class="order-total">₺@order.TotalAmount.ToString("N0")</span>
+                                <a href="@Url.Action("Detail", "Order", new { id = order.Id })" class="profile-edit-btn">Detay</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ADRESLERİM -->
+        <div class="profile-tab" id="tab-addresses">
+            <div class="profile-section-head">
+                <h2>Adreslerim</h2>
+                <button class="profile-edit-btn" onclick="toggleAddressForm()">+ Yeni Adres</button>
+            </div>
+
+            <!-- YENİ ADRES FORMU -->
+            <div id="addressForm" style="display:none" class="address-form">
+                <div class="profile-info-grid">
+                    <div class="profile-form-group">
+                        <label>Adres Başlığı</label>
+                        <input class="profile-input" id="addrTitle" placeholder="Ev, İş..." />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Ad Soyad</label>
+                        <input class="profile-input" id="addrFullName" placeholder="Teslimat alıcısı" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Telefon</label>
+                        <input class="profile-input" id="addrPhone" placeholder="05XX XXX XX XX" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>Şehir</label>
+                        <input class="profile-input" id="addrCity" placeholder="İstanbul" />
+                    </div>
+                    <div class="profile-form-group">
+                        <label>İlçe</label>
+                        <input class="profile-input" id="addrDistrict" placeholder="Kadıköy" />
+                    </div>
+                </div>
+                <div class="profile-form-group" style="margin-top:12px">
+                    <label>Açık Adres</label>
+                    <textarea class="profile-input" id="addrFull" rows="3" placeholder="Mahalle, sokak, bina no..."></textarea>
+                </div>
+                <label class="profile-check-label" style="margin-top:8px">
+                    <input type="checkbox" id="addrDefault" /> Varsayılan adres olarak ayarla
+                </label>
+                <div class="profile-form-actions">
+                    <button class="profile-save-btn" onclick="saveAddress()">Kaydet</button>
+                    <button class="profile-cancel-btn" onclick="toggleAddressForm()">İptal</button>
+                </div>
+            </div>
+
+            @if (!addresses.Any())
+            {
+                <div class="profile-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                    <p>Kayıtlı adresiniz yok.</p>
+                </div>
+            }
+            else
+            {
+                <div class="address-list">
+                    @foreach (var addr in addresses)
+                    {
+                        <div class="address-card">
+                            <div class="address-card-head">
+                                <span class="address-title">@addr.Title</span>
+                                @if (addr.IsDefault)
+                                {
+                                    <span class="address-default-badge">Varsayılan</span>
+                                }
+                                <button class="address-delete" onclick="deleteAddress(@addr.Id, this)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+                                </button>
+                            </div>
+                            <p class="address-name">@addr.FullName</p>
+                            <p class="address-text">@addr.FullAddress, @addr.District / @addr.City</p>
+                            <p class="address-phone">@addr.Phone</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- GÜVENLİK -->
+        <div class="profile-tab" id="tab-security">
+            <div class="profile-section-head">
+                <h2>Güvenlik</h2>
+            </div>
+            <div class="profile-info-grid">
+                <div class="profile-form-group">
+                    <label>Mevcut Şifre</label>
+                    <input class="profile-input" type="password" id="oldPassword" />
+                </div>
+                <div class="profile-form-group">
+                    <label>Yeni Şifre</label>
+                    <input class="profile-input" type="password" id="newPassword" />
+                </div>
+                <div class="profile-form-group">
+                    <label>Yeni Şifre (Tekrar)</label>
+                    <input class="profile-input" type="password" id="newPassword2" />
+                </div>
+            </div>
+            <div class="profile-form-actions">
+                <button class="profile-save-btn" onclick="changePassword()">Şifreyi Güncelle</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/account.js"></script>
+}

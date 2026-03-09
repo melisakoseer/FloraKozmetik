@@ -1,0 +1,125 @@
+﻿@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var order = ViewBag.Order as Order;
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Ana Sayfa</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="@Url.Action("Index", "Account")">Hesabım</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Sipariş #@order?.Id.ToString("D6")</span>
+</div>
+
+<div class="checkout-wrap" style="max-width:900px;margin:0 auto;padding:40px 20px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:28px;margin:0">
+            Sipariş #@order?.Id.ToString("D6")
+        </h1>
+        <span class="order-status-badge order-status-badge--@order?.Status.ToLower()">@order?.Status</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:24px">
+
+        <!-- ÜRÜNLER -->
+        <div>
+            <div class="checkout-section">
+                <h2 class="checkout-section-title">
+                    <span class="checkout-step">1</span>
+                    Sipariş Ürünleri
+                </h2>
+                <div style="display:flex;flex-direction:column;gap:16px">
+                    @foreach (var item in order?.OrderItems ?? new List<OrderItem>())
+                    {
+                        <div style="display:flex;gap:16px;align-items:center;padding:16px;background:#fafafa;border-radius:12px">
+                            <img src="@item.ProductImage" style="width:72px;height:72px;object-fit:cover;border-radius:8px;background:#f0f0f0" />
+                            <div style="flex:1">
+                                <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600">@item.ProductName</div>
+                                <div style="font-size:13px;color:#999;margin-top:4px">@item.Quantity adet × ₺@item.UnitPrice.ToString("N2")</div>
+                            </div>
+                            <div style="font-weight:600;font-size:15px">₺@((item.Quantity * item.UnitPrice).ToString("N2"))</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- TESLİMAT ADRESİ -->
+            <div class="checkout-section">
+                <h2 class="checkout-section-title">
+                    <span class="checkout-step">2</span>
+                    Teslimat Adresi
+                </h2>
+                <p style="font-size:14px;color:#555;line-height:1.7;margin:0">@order?.ShippingAddress</p>
+            </div>
+
+            <!-- İPTAL BUTONU -->
+            @if (order?.Status == "Bekliyor")
+            {
+                <div class="checkout-section">
+                    <h2 class="checkout-section-title">
+                        <span class="checkout-step">3</span>
+                        Sipariş İptali
+                    </h2>
+                    <p style="font-size:13px;color:#999;margin:0 0 16px">Sipariş henüz işleme alınmadı. İptal edebilirsiniz.</p>
+                    <button class="btn-outline-danger" onclick="openCancelModal(@order.Id)">Siparişi İptal Et</button>
+                </div>
+            }
+        </div>
+
+        <!-- ÖZET -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="checkout-section">
+                <h2 class="checkout-section-title" style="font-size:15px">Ödeme Özeti</h2>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+                    <div style="display:flex;justify-content:space-between">
+                        <span style="color:#999">Sipariş Tarihi</span>
+                        <span>@order?.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between">
+                        <span style="color:#999">Ödeme</span>
+                        <span>@order?.PaymentMethod</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(order?.CouponCode))
+                    {
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#999">Kupon</span>
+                            <span style="color:#5a7a5a">@order.CouponCode</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:#999">İndirim</span>
+                            <span style="color:#c62828">-₺@order.DiscountAmount.ToString("N2")</span>
+                        </div>
+                    }
+                    <div style="display:flex;justify-content:space-between;font-weight:600;font-size:16px;padding-top:10px;border-top:1px solid #f0f0f0">
+                        <span>Toplam</span>
+                        <span>₺@order?.TotalAmount.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="@Url.Action("Index", "Account")#orders" class="back-to-orders-btn">
+                ← Siparişlerime Dön
+            </a>
+        </div>
+    </div>
+</div>
+<!-- İptal Modal -->
+<div id="cancelModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:14px;padding:32px;max-width:400px;width:90%;text-align:center">
+        <div style="width:56px;height:56px;background:#fce4ec;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+        </div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;margin:0 0 8px">Siparişi İptal Et</h3>
+        <p style="color:#777;font-size:14px;margin:0 0 24px">Bu siparişi iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        <div style="display:flex;gap:12px;justify-content:center">
+            <button onclick="closeCancelModal()" class="back-to-orders-btn" style="background:#f5f5f5;color:#555;border:1px solid #ddd">Vazgeç</button>
+            <button onclick="confirmCancel()" class="btn-outline-danger">İptal Et</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/order-detail.js"></script>
+}

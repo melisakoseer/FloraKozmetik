@@ -1,0 +1,53 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Siparişler";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var orders = ViewBag.Orders as List<Order> ?? new List<Order>();
+}
+
+<div class="admin-card">
+    <div class="admin-card-head">
+        <div style="display:flex;gap:8px">
+            @foreach (var s in new[] { "", "Bekliyor", "Paketlendi", "Kargolandı", "Tamamlandı", "İptal" })
+            {
+                <a href="@Url.Action("Orders", "Admin", new { status = s })"
+                   class="admin-filter-btn @(ViewBag.Status == s || (s == "" && ViewBag.Status == null) ? "active" : "")">
+                    @(s == "" ? "Tümü" : s)
+                </a>
+            }
+        </div>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Sipariş No</th>
+                <th>Müşteri</th>
+                <th>Ürünler</th>
+                <th>Tutar</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>
+                        <a href="@Url.Action("OrderDetail", "Admin", new { id = order.Id })" class="admin-link" style="font-weight:600">
+                            #@order.Id.ToString("D6")
+                        </a>
+                    </td>
+                    <td style="font-weight:600">#@order.Id.ToString("D6")</td>
+                    <td>@(order.User?.FirstName + " " + order.User?.LastName)</td>
+                    <td style="font-size:13px;color:#777">@order.OrderItems.Count ürün</td>
+                    <td style="font-weight:600">₺@order.TotalAmount.ToString("N0")</td>
+                    <td style="font-size:13px;color:#999">@order.CreatedAt.ToString("dd.MM.yyyy")</td>
+                    <td><span class="order-status order-status--@order.Status.ToLower()">@order.Status</span></td>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

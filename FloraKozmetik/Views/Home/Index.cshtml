@@ -1,0 +1,352 @@
+@using FloraKozmetik.Models
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+    var discounted = ViewBag.Discounted as List<Product> ?? new List<Product>();
+    var heroProducts = ViewBag.HeroProducts as List<Product> ?? new List<Product>();
+    var hero0 = ViewBag.Hero0 as Product;
+    var hero1 = ViewBag.Hero1 as Product;
+    var hero2 = ViewBag.Hero2 as Product;
+    var featProduct = ViewBag.FeatProduct as Product;
+}
+
+<!-- HERO SLIDER -->
+<section class="hero" id="heroSection">
+    <div class="hero-slide active" id="slide-0">
+        <div class="hero-slide-text">
+            <p class="hero-tag">Bahar Koleksiyonu 2025</p>
+            <h1 class="hero-h1">Doğanın<br>Gücüyle<br><em>Işıl Işıl</em></h1>
+            <p class="hero-sub">Bitkisel özler ve bilimin buluştuğu noktada doğan bakım ritüelleri. Cildinizi besleyin, ruhunuzu dinlendirin.</p>
+            <div class="hero-btns">
+                <a href="@Url.Action("Index", "Products", new { category = "skincare" })" class="btn-fill sage">Koleksiyonu Keşfet</a>
+                <a href="#" class="btn-outline">Cilt Testim</a>
+            </div>
+        </div>
+        <div class="hero-slide-visual">
+            <div class="bg slide-bg-0"></div>
+            @if (hero0 != null)
+            {
+                <img src="@hero0.ImageUrl" alt="@hero0.Name" class="hero-slide-img" />
+            }
+            <div class="hero-badge-wrap">
+                <div class="hero-badge"><div class="hb-icon">🌿</div><div><div class="hb-label">Formül</div><div class="hb-val">%100 Doğal</div></div></div>
+                <div class="hero-badge"><div class="hb-icon">🐰</div><div><div class="hb-label">Sertifika</div><div class="hb-val">Cruelty-Free</div></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-slide" id="slide-1">
+        <div class="hero-slide-text">
+            <p class="hero-tag">Yeni Koleksiyon</p>
+            <h1 class="hero-h1"><em>Parfüm</em><br>Koleksiyonu<br>Geldi</h1>
+            <p class="hero-sub">Doğadan ilham alan özgün kokular. Her biri bir his, her biri bir hikaye.</p>
+            <div class="hero-btns">
+                <a href="@Url.Action("Index", "Products", new { category = "fragrances" })" class="btn-fill sage">Kokuları Keşfet</a>
+            </div>
+        </div>
+        <div class="hero-slide-visual">
+            <div class="bg slide-bg-1"></div>
+            @if (hero1 != null)
+            {
+                <img src="@hero1.ImageUrl" alt="@hero1.Name" class="hero-slide-img" />
+            }
+            <div class="hero-badge-wrap">
+                <div class="hero-badge"><div class="hb-icon">⭐</div><div><div class="hb-label">Değerlendirme</div><div class="hb-val">4.9 / 5.0</div></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-slide" id="slide-2">
+        <div class="hero-slide-text">
+            <p class="hero-tag">Trend Makyaj</p>
+            <<h1 class="hero-h1">Makyaj<br><em>Koleksiyonu</em><br>Geldi</h1>
+            <p class="hero-sub">Doğal pigmentlerle üretilmiş kalıcı renkler. Ruj, maskara, göz farı ve daha fazlası.</p>
+            <div class="hero-btns">
+                <a href="@Url.Action("Index", "Products", new { category = "beauty" })" class="btn-fill sage">Makyajı Keşfet</a>
+            </div>
+        </div>
+        <div class="hero-slide-visual">
+            <div class="bg slide-bg-2"></div>
+            @if (hero2 != null)
+            {
+                <img src="@hero2.ImageUrl" alt="@hero2.Name" class="hero-slide-img" />
+            }
+            <div class="hero-badge-wrap">
+                <div class="hero-badge"><div class="hb-icon">✨</div><div><div class="hb-label">Koleksiyon</div><div class="hb-val">12 Koku</div></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-arrows">
+        <button class="hero-arrow" onclick="changeSlide(-1)">↑</button>
+        <button class="hero-arrow" onclick="changeSlide(1)">↓</button>
+    </div>
+    <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-bar" aria-hidden="true">
+    <div class="marquee-track" id="marqTrack"></div>
+</div>
+
+<!-- PROMO BANNERLAR -->
+<div class="promos">
+    <div class="promo-card promo-0">
+        <div class="promo-bg-text">YÜZ</div>
+        <p class="promo-tag">✦ Çok Satan</p>
+        <h3 class="promo-title">Yüz Bakım<br>Rutini</h3>
+        <p class="promo-desc">Sabah &amp; akşam 3 adımlı sistem</p>
+        <a href="@Url.Action("Index", "Products", new { category = "skincare" })" class="promo-link">Keşfet</a>
+    </div>
+    <div class="promo-card promo-1">
+        <div class="promo-bg-text">KOK</div>
+        <p class="promo-tag">✦ Yeni</p>
+        <h3 class="promo-title">Parfüm<br>Koleksiyonu</h3>
+        <p class="promo-desc">12 özgün koku, sınırlı stok</p>
+        <a href="@Url.Action("Index", "Products", new { category = "fragrances" })" class="promo-link">Keşfet</a>
+    </div>
+    <div class="promo-card promo-2">
+        <div class="promo-bg-text">MAK</div>
+        <p class="promo-tag">✦ Trend</p>
+        <h3 class="promo-title">Makyaj<br>Koleksiyonu</h3>
+        <p class="promo-desc">Doğal pigmentli kalıcı renkler</p>
+        <a href="@Url.Action("Index", "Products", new { category = "beauty" })" class="promo-link">İncele</a>
+    </div>
+</div>
+
+<!-- ÖNE ÇIKAN ÜRÜNLER -->
+<section class="section" id="products">
+    <div class="s-row">
+        <div class="s-header" style="margin:0">
+            <p class="s-label">Ürünler</p>
+            <h2 class="s-title">Öne Çıkan <em>Ürünler</em></h2>
+        </div>
+        <a href="@Url.Action("Index", "Products")" class="see-all">Tümünü Gör</a>
+    </div>
+    <div class="products-grid" id="prodGrid">
+        @foreach (var p in products)
+        {
+            var disc = p.OriginalPrice.HasValue ? (int)Math.Round((1 - p.Price / p.OriginalPrice.Value) * 100) : 0;
+            <div class="p-card" data-category="@p.Category">
+                <div class="p-img-wrap">
+                    <a href="@Url.Action("Detail", "Products", new { id = p.Id })">
+                        <img class="p-img" src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                    </a>
+                    @if (p.OriginalPrice.HasValue)
+                    {
+                        <div class="p-badge badge-sale">-%@disc</div>
+                    }
+                    <div class="p-actions">
+                        <button class="p-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                        <a class="p-quick" href="@Url.Action("Detail", "Products", new { id = p.Id })">Detayı Gör</a>
+                    </div>
+                    <button class="p-wish" id="pw@(p.Id)" onclick="toggleFavorite(@p.Id, this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </button>
+                </div>
+                <div class="p-card-right">
+                    <div>
+                        <p class="p-brand">@p.Brand</p>
+                        <h3 class="p-name"><a href="@Url.Action("Detail", "Products", new { id = p.Id })">@p.Name</a></h3>
+                        <p class="p-desc">@p.Description</p>
+                    </div>
+                    <div>
+                        <div class="p-price">
+                            <span class="pp-new">₺@p.Price.ToString("N0")</span>
+                            @if (p.OriginalPrice.HasValue)
+                            {
+                                <span class="pp-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                                <span class="pp-disc">-%@disc</span>
+                            }
+                        </div>
+                        <button class="list-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- FIRSATLAR -->
+@if (discounted.Any())
+{
+    <section class="section tight">
+        <div class="s-row">
+            <div class="s-header center">
+                <p class="s-label center-lbl">Fırsatlar</p>
+                <h2 class="s-title">Kaçırma <em>İndirimler</em></h2>
+            </div>
+            <a href="@Url.Action("Index", "Deals")" class="see-all">Tümünü Gör</a>
+        </div>
+        <div class="products-grid" style="display:grid; grid-template-columns: repeat(4,1fr); gap:24px; padding:0 40px">
+            @foreach (var p in discounted)
+            {
+                var disc = (int)Math.Round((1 - p.Price / p.OriginalPrice!.Value) * 100);
+                <div class="p-card">
+                    <div class="p-img-wrap">
+                        <a href="@Url.Action("Detail", "Products", new { id = p.Id })">
+                            <img class="p-img" src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                        </a>
+                        <div class="p-badge badge-sale">-%@disc</div>
+                        <div class="p-actions">
+                            <button class="p-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                            <a class="p-quick" href="@Url.Action("Detail", "Products", new { id = p.Id })">Detayı Gör</a>
+                        </div>
+                        <button class="p-wish" id="pw@(p.Id)" onclick="toggleFavorite(@p.Id, this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                    </div>
+                    <div class="p-card-right">
+                        <div>
+                            <p class="p-brand">@p.Brand</p>
+                            <h3 class="p-name"><a href="@Url.Action("Detail", "Products", new { id = p.Id })">@p.Name</a></h3>
+                        </div>
+                        <div>
+                            <div class="p-price">
+                                <span class="pp-new">₺@p.Price.ToString("N0")</span>
+                                <span class="pp-old">₺@p.OriginalPrice.Value.ToString("N0")</span>
+                                <span class="pp-disc">-%@disc</span>
+                            </div>
+                            <button class="list-atc" onclick="addToCart(@p.Id)">Sepete Ekle</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+<!-- EDİTÖR SEÇİMİ -->
+<section class="section tight">
+    <div class="s-header center">
+        <p class="s-label center-lbl">Editör Seçimi</p>
+        <h2 class="s-title">Bu Sezon <em>Öne Çıkanlar</em></h2>
+    </div>
+    <div class="featured-strip">
+        <div class="feat-big">
+            <div class="feat-big-bg" aria-hidden="true"></div>
+            <div class="feat-big-content">
+                <p class="feat-tag">✦ Sezonun Favori</p>
+                @if (featProduct != null)
+                {
+                    <img src="@featProduct.ImageUrl" alt="@featProduct.Name" class="feat-big-img" />
+                }
+                <h3 class="feat-title">Botanik Serum Koleksiyonu</h3>
+                <p class="feat-sub">Cilt tipine özel 5 formül · 30ml</p>
+                <br>
+                <a href="/Products?category=skincare" class="promo-link">Koleksiyonu Gör</a>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-rows:1fr 1fr;gap:24px">
+            <div class="feat-small feat-small-0">
+                <p class="feat-tag">✦ Trend</p>
+                <h3 class="feat-title">Göz Bakım Seti</h3>
+                <p class="feat-sub">Göz altı &amp; göz kapağı</p>
+            </div>
+            <div class="feat-small feat-small-1">
+                <p class="feat-tag">✦ Yeni</p>
+                <h3 class="feat-title">Dudak Bakım</h3>
+                <p class="feat-sub">Balçiçeği özlü</p>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-rows:1fr 1fr;gap:24px">
+            <div class="feat-small feat-small-2">
+                <p class="feat-tag">✦ Popüler</p>
+                <h3 class="feat-title">Vücut Yağı</h3>
+                <p class="feat-sub">Badem &amp; argan karışımı</p>
+            </div>
+            <div class="feat-small feat-small-3">
+                <p class="feat-tag">✦ Organik</p>
+                <h3 class="feat-title">Saç Maskesi</h3>
+                <p class="feat-sub">Keratinli onarıcı formül</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MÜŞTERİ YORUMLARI -->
+<section class="testimonials-section">
+    <div class="s-header center">
+        <p class="s-label center-lbl" style="color:rgba(255,255,255,.5)">Yorumlar</p>
+        <h2 class="s-title" style="color:white">Müşterilerimiz <em>Ne Diyor?</em></h2>
+    </div>
+    <div class="testi-grid" id="testiGrid">
+        <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"Gül özlü serumu kullanmaya başladığımdan beri cildim çok daha parlak ve nemli görünüyor. Kesinlikle tavsiye ederim!"</p>
+            <div class="testi-user">
+                <div class="testi-avatar">AY</div>
+                <div>
+                    <p class="testi-name">Ayşe Y.</p>
+                    <p class="testi-prod" >Gül Özlü Nemlendirici Serum</p>
+                </div>
+            </div>
+        </div>
+        <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"CK One parfümünü aldım, gerçekten kalıcı bir koku. Aldığım ürün tam beklediğim gibi çıktı. Flora'ya bayıldım!"</p>
+            <div class="testi-user">
+                <div class="testi-avatar">MK</div>
+                <div>
+                    <p class="testi-name">Melisa K.</p>
+                    <p class="testi-prod">CK One Unisex EDT</p>
+                </div>
+            </div>
+        </div>
+        <div class="testi-card">
+            <div class="testi-stars">★★★★☆</div>
+            <p class="testi-text">"Göz farı paletini aldım, renkleri çok canlı ve kalıcı. Fiyat/performans açısından harika bir ürün."</p>
+            <div class="testi-user">
+                <div class="testi-avatar">ZD</div>
+                <div>
+                    <p class="testi-name">Zeynep D.</p>
+                    <p class="testi-prod">Aynalı 12li Göz Farı Paleti</p>
+                </div>
+            </div>
+        </div>
+        <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"Kargo çok hızlı geldi, ürün kalitesi mükemmel. Maskara gerçekten kirpiklerimi çok uzun gösteriyor!"</p>
+            <div class="testi-user">
+                <div class="testi-avatar">SB</div>
+                <div>
+                    <p class="testi-name">Selin B.</p>
+                    <p class="testi-prod">Hacim Veren Maskara</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ÖZELLİKLER ÇUBUĞU -->
+<div class="features-bar ">
+    <div class="feat-bar-item">
+        <div class="fbi-icon"></div>
+        <div><div class="fbi-title">Ücretsiz Kargo</div><div class="fbi-desc">500₺ üzeri tüm siparişlerde</div></div>
+    </div>
+    <div class="feat-bar-item">
+        <div class="fbi-icon">↩</div>
+        <div><div class="fbi-title">30 Gün İade</div><div class="fbi-desc">Koşulsuz iade garantisi</div></div>
+    </div>
+    <div class="feat-bar-item">
+        <div class="fbi-icon"></div>
+        <div><div class="fbi-title">%100 Doğal</div><div class="fbi-desc">Bitkisel sertifikalı içerikler</div></div>
+    </div>
+    <div class="feat-bar-item">
+        <div class="fbi-icon"></div>
+        <div><div class="fbi-title">Güvenli Ödeme</div><div class="fbi-desc">256-bit SSL şifrelemesi</div></div>
+    </div>
+</div>
+
+<!-- BÜLTEN -->
+<div class="newsletter ">
+    <div>
+        <p class="nl-label">✦ Flora Topluluğu</p>
+        <h2 class="nl-title">Güzellik Sırlarını<br><em>İlk Sen Öğren</em></h2>
+        <p class="nl-desc">Yeni ürünler, özel indirimler ve bakım ipuçları doğrudan e-postana gelsin.</p>
+        <div class="nl-perks">
+            <span class="nl-perk">✓ %15 ilk sipariş indirimi</span>
+            <span class="nl-perk">✓ Özel kampanyalar</span>
+            <span class="nl-perk">✓ Uzman bakım tavsiyeleri</span>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/home.js"></script>
+}
