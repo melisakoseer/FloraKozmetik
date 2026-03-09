@@ -1,43 +1,26 @@
-﻿let activeDeleteId = null;
-
-function openDeleteModal(id) {
-    activeDeleteId = id;
-    $('#deleteModal').css('display', 'flex');
+﻿function selectSize(btn, size) {
+    $('.size-btn').removeClass('active');
+    $(btn).addClass('active');
+    $('#selectedSize').text(size);
 }
 
-function closeDeleteModal() {
-    $('#deleteModal').hide();
-    activeDeleteId = null;
+let qty = 1;
+
+function changeQty(delta) {
+    qty = Math.max(1, qty + delta);
+    $('#detailQty').val(qty);
 }
 
-function confirmDelete() {
-    if (activeDeleteId) {
-        $('#deleteForm-' + activeDeleteId).submit();
-    }
+function switchThumb(el, src) {
+    $('.gallery-thumb').removeClass('active');
+    $(el).addClass('active');
+    const main = $('#galleryMain');
+    main.css('opacity', '0');
+    setTimeout(() => {
+        main.attr('src', src).css('opacity', '1');
+    }, 200);
 }
 
-$('#deleteModal').on('click', function (e) {
-    if (e.target === this) closeDeleteModal();
-});
-
-let activeHardDeleteId = null;
-
-function openHardDeleteModal(id) {
-    activeHardDeleteId = id;
-    $('#hardDeleteModal').css('display', 'flex');
+function toggleAccordion(btn) {
+    $(btn).closest('.accordion-item').toggleClass('open');
 }
-
-function closeHardDeleteModal() {
-    $('#hardDeleteModal').hide();
-    activeHardDeleteId = null;
-}
-
-function confirmHardDelete() {
-    if (activeHardDeleteId) {
-        $('#hardDeleteForm-' + activeHardDeleteId).submit();
-    }
-}
-
-$('#hardDeleteModal').on('click', function (e) {
-    if (e.target === this) closeHardDeleteModal();
-});
