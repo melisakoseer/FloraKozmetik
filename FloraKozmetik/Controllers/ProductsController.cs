@@ -21,8 +21,8 @@ namespace FloraKozmetik.Controllers
             if (!gecerliKategoriler.Contains(category))
                 category = "skincare";
 
-            //fiyat filtresi sadece değer geldiğinde ekleniyor
-            var query = _context.Products.Where(p => p.IsActive && p.Category == category);
+            //fiyat filtresi sadece değer geldiğinde ekleniyor stok 0 sa ürün gözükmez
+            var query = _context.Products.Where(p => p.IsActive && p.Stock > 0 && p.Category == category);
 
             if (minPrice.HasValue) query = query.Where(p => p.Price >= minPrice.Value);
             if (maxPrice.HasValue) query = query.Where(p => p.Price <= maxPrice.Value);
@@ -91,7 +91,7 @@ namespace FloraKozmetik.Controllers
                 return RedirectToAction("Index");
 
             var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive && p.Stock > 0);
 
             if (product == null)
                 return NotFound();

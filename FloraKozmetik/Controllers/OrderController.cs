@@ -143,6 +143,20 @@ namespace FloraKozmetik.Controllers
             // Sipariş kalemleri
             foreach (var item in cartItems)
             {
+                var product = await _context.Products.FindAsync(item.ProductId);
+
+                if (product == null || product.Stock < item.Quantity)
+                {
+                    return Json(new { success = false, message = $"{item.Product!.Name} için yeterli stok yok." });
+                }
+
+                // stok azalt
+                product.Stock -= item.Quantity;
+
+                // stok 0 olursa ürünü pasif yap
+                if (product.Stock <= 0)
+                    product.IsActive = false;
+
                 var orderItem = new OrderItem
                 {
                     OrderId = order.Id,
@@ -152,6 +166,7 @@ namespace FloraKozmetik.Controllers
                     Quantity = item.Quantity,
                     UnitPrice = item.Product.Price
                 };
+
                 _context.OrderItems.Add(orderItem);
             }
 

@@ -269,7 +269,7 @@ namespace FloraKozmetik.Controllers
             await _context.SaveChangesAsync();
 
             await _signInManager.SignOutAsync();
-            await _userManager.DeleteAsync(user);
+            await _userManager.DeleteAsync(user);   
             return Json(new { success = true });
         }
     }

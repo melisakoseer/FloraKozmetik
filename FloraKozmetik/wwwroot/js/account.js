@@ -29,13 +29,20 @@ function toggleAddressForm() {
 }
 
 function saveAddress() {
+    const title = $('#addrTitle').val();
+    const fullName = $('#addrFullName').val();
+    const phone = $('#addrPhone').val();
+    const city = $('#addrCity').val();
+    const district = $('#addrDistrict').val();
+    const fullAddress = $('#addrFull').val();
+
+    if (!title || !fullName || !phone || !city || !district || !fullAddress) {
+        showToast('Lütfen tüm alanlarý doldurun.', 'error');
+        return;
+    }
+
     $.post('/Account/AddAddress', {
-        title: $('#addrTitle').val(),
-        fullName: $('#addrFullName').val(),
-        phone: $('#addrPhone').val(),
-        city: $('#addrCity').val(),
-        district: $('#addrDistrict').val(),
-        fullAddress: $('#addrFull').val(),
+        title, fullName, phone, city, district, fullAddress,
         isDefault: $('#addrDefault').prop('checked')
     }, function (data) {
         if (data.success) {
@@ -45,12 +52,27 @@ function saveAddress() {
     });
 }
 
+var activeAddressId = null;
+var activeAddressBtn = null;
+
 function deleteAddress(id, btn) {
-    if (!confirm('Bu adresi silmek istediðinize emin misiniz?')) return;
-    $.post('/Account/DeleteAddress', { id: id }, function (data) {
+    activeAddressId = id;
+    activeAddressBtn = btn;
+    $('#deleteAddressModal').css('display', 'flex');
+}
+
+function closeDeleteAddressModal() {
+    $('#deleteAddressModal').hide();
+    activeAddressId = null;
+    activeAddressBtn = null;
+}
+
+function confirmDeleteAddress() {
+    $.post('/Account/DeleteAddress', { id: activeAddressId }, function (data) {
         if (data.success) {
-            $(btn).closest('.address-card').remove();
+            $(activeAddressBtn).closest('.address-card').remove();
             showToast('Adres silindi.');
+            closeDeleteAddressModal();
         }
     });
 }
@@ -80,6 +102,7 @@ function changePassword() {
         }
     });
 }
+
 function deleteAccount() {
     $('#deleteAccountModal').css('display', 'flex');
 }
@@ -95,3 +118,12 @@ function confirmDeleteAccount() {
         }
     });
 }
+
+$(document).ready(function () {
+    $('#deleteAddressModal').on('click', function (e) {
+        if (e.target === this) closeDeleteAddressModal();
+    });
+    $('#deleteAccountModal').on('click', function (e) {
+        if (e.target === this) closeDeleteAccountModal();
+    });
+});
